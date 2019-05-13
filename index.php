@@ -30,7 +30,7 @@
     public static function getAllPrenotazioni($conn) {
 
       $sql = "
-              SELECT *
+              SELECT id, stanza_id, configurazione_id, created_at
               FROM prenotazioni
               WHERE MONTH(created_at) = 5
               ORDER BY created_at DESC
@@ -86,7 +86,7 @@
 
       $sql = "
 
-              SELECT *
+              SELECT id, room_number, floor, beds
               FROM stanze
               WHERE id = $id
 
@@ -131,7 +131,7 @@
 
       $sql = "
 
-              SELECT *
+              SELECT id, title, description
               FROM configurazioni
               WHERE id = $id
 
@@ -178,7 +178,7 @@
 
       $sql = "
 
-              SELECT *
+              SELECT id, status, price
               FROM pagamenti
               WHERE prenotazione_id = $id
 
@@ -202,36 +202,33 @@
     private $id;
     private $name;
     private $lastname;
-    private $ospiteId;
-    private $prenotazioneId;
-    private $prenotazioniId;
 
-    function __construct($id, $name, $lastname, $ospiteId, $prenotazioneId, $prenotazioniId) {
+    function __construct($id, $name, $lastname) {
 
       $this->id = $id;
       $this->name = $name;
       $this->lastname = $lastname;
-      $this->ospiteId = $ospiteId;
-      $this->prenotazioneId = $prenotazioneId;
-      $this->prenotazioniId = $prenotazioniId;
 
     }
 
     function getName() {
       return $this->name;
     }
+    function getLastname() {
+      return $this->lastname;
+    }
 
-    public static function getOspiteByOspitiId($conn, $prenotazioniId) {
+    public static function getOspiteById($conn, $id) {
 
       $sql = "
 
-              SELECT ospiti.id, ospiti.name, ospiti.lastname, prenotazioni_has_ospiti.ospite_id, prenotazioni_has_ospiti.prenotazione_id, prenotazioni.id
-              FROM ospiti
+              SELECT prenotazioni.id, ospiti.name, ospiti.lastname
+              FROM prenotazioni
               JOIN prenotazioni_has_ospiti
-              ON ospiti.id = prenotazioni_has_ospiti.ospite_id
-              JOIN prenotazioni
-              ON prenotazioni_has_ospiti.prenotazione_id = prenotazioni.id
-              WHERE ospiti.id = $prenotazioniId
+              ON prenotazioni.id = prenotazioni_has_ospiti.prenotazione_id
+              JOIN ospiti
+              ON prenotazioni_has_ospiti.ospite_id = ospiti.id
+              WHERE prenotazioni.id = $id
 
       ";
 
@@ -241,15 +238,11 @@
         $row = $result->fetch_assoc();
         $ospite = new Ospite( $row["id"],
                               $row["name"],
-                              $row["lastname"],
-                              $row["ospite_id"],
-                              $row["prenotazione_id"],
-                              $row["id"]);
+                              $row["lastname"]);
       }
 
       return $ospite;
     }
-
   }
 
   $conn = new mysqli($servername, $username, $password, $dbname);
@@ -273,8 +266,8 @@
     $pagamentoId = $prenotazione->getId();
     $pagamento = Pagamento::getPagamentoById($conn, $pagamentoId);
 
-    $ospiteID = $prenotazione->getId(); // ID sbagliato ?!?!?!
-    $ospite = Ospite::getOspiteByOspitiId($conn, $ospiteID);
+    $ospiteId = $prenotazione->getId();
+    $ospite = Ospite::getOspiteById($conn, $ospiteId);
 
     echo "Prenotazione: " . $prenotazione->getId() . "<br>" .
             "- Stanza: " . $stanza->getId() .
@@ -288,8 +281,7 @@
                 " ; Status: " . $pagamento->getStatus() .
                 " ; Price: " . $pagamento->getPrice() . " € <br>" .
             "- Ospiti: " .  $ospite->getName() .
-            // NOT WORKING
-            "<br><br>"
+                " " . $ospite->getLastname() . "<br><br>"
          ;
   }
 
