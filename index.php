@@ -23,6 +23,9 @@
     function getStanzaId() {
       return $this->stanzaId;
     }
+    function getConfigurazioneId() {
+      return $this->configurazioneId;
+    }
 
     public static function getAllPrenotazioni($conn) {
 
@@ -30,6 +33,7 @@
               SELECT *
               FROM prenotazioni
               WHERE MONTH(created_at) = 5
+              ORDER BY created_at DESC
 
       ";
 
@@ -65,12 +69,17 @@
       $this->beds = $beds;
 
     }
-
+    function getId() {
+      return $this->id;
+    }
     function getRoomNumber() {
       return $this->roomNumber;
     }
     function getFloor() {
       return $this->floor;
+    }
+    function getBeds() {
+      return $this->beds;
     }
 
     public static function getStanzaById($conn, $id) {
@@ -97,6 +106,52 @@
     }
   }
 
+  class Configurazione {
+
+    private $id;
+    private $title;
+    private $description;
+
+    function __construct($id, $title, $description) {
+
+      $this->id = $id;
+      $this->title = $title;
+      $this->description = $description;
+
+    }
+
+    function getTitle() {
+      return $this->title;
+    }
+    function getDescription() {
+      return $this->description;
+    }
+
+    public static function getConfigurazioneById($conn, $id) {
+
+      $sql = "
+
+              SELECT *
+              FROM configurazioni
+              WHERE id = $id
+
+      ";
+
+      $result = $conn->query($sql);
+
+      if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $configurazione = new Configurazione( $row["id"],
+                                              $row["title"],
+                                              $row["description"]);
+      }
+
+      return $configurazione;
+    }
+
+
+  }
+
   $conn = new mysqli($servername, $username, $password, $dbname);
 
   if ($conn->connect_errno) {
@@ -112,9 +167,22 @@
     $stanzaId = $prenotazione->getStanzaId();
     $stanza = Stanza::getStanzaById($conn, $stanzaId);
 
-    echo "ID prenotazione: " . $prenotazione->getId() . "<br>" .
-         "Numero stanza: " . $stanza->getRoomNumber() . "<br>" .
-         "Piano stanza: " . $stanza->getFloor() . "<br><br>";
+    $configurazioneId = $prenotazione->getConfigurazioneId();
+    $configurazione = Configurazione::getConfigurazioneById($conn, $configurazioneId);
+
+    echo "Prenotazione: " . $prenotazione->getId() . "<br>" .
+            "- Stanza: " . $stanza->getId() .
+                " ; Number: " . $stanza->getRoomNumber() .
+                " ; Floor: " . $stanza->getFloor() .
+                " ; Beds: " . $stanza->getBeds() . "<br>" .
+            "- Configurazione: " . $prenotazione->getConfigurazioneId() .
+                " ; " . $configurazione->getTitle() .
+                " ; " . $configurazione->getDescription() .
+
+            "<br><br>"
+
+
+         ;
   }
 
 
