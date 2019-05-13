@@ -148,8 +148,53 @@
 
       return $configurazione;
     }
+  }
 
+  class Pagamento {
 
+    private $id;
+    private $status;
+    private $price;
+
+    function __construct($id, $status, $price) {
+
+      $this->id = $id;
+      $this->status = $status;
+      $this->price = $price;
+
+    }
+
+    function getId() {
+      return $this->id;
+    }
+    function getStatus() {
+      return $this->status;
+    }
+    function getPrice() {
+      return $this->price;
+    }
+
+    public static function getPagamentoById($conn, $id) {
+
+      $sql = "
+
+              SELECT *
+              FROM pagamenti
+              WHERE prenotazione_id = $id
+
+      ";
+
+      $result = $conn->query($sql);
+
+      if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $pagamento = new Pagamento( $row["id"],
+                                    $row["status"],
+                                    $row["price"]);
+      }
+
+      return $pagamento;
+    }
   }
 
   $conn = new mysqli($servername, $username, $password, $dbname);
@@ -170,6 +215,9 @@
     $configurazioneId = $prenotazione->getConfigurazioneId();
     $configurazione = Configurazione::getConfigurazioneById($conn, $configurazioneId);
 
+    $pagamentoId = $prenotazione->getId();
+    $pagamento = Pagamento::getPagamentoById($conn, $pagamentoId);
+
     echo "Prenotazione: " . $prenotazione->getId() . "<br>" .
             "- Stanza: " . $stanza->getId() .
                 " ; Number: " . $stanza->getRoomNumber() .
@@ -177,54 +225,15 @@
                 " ; Beds: " . $stanza->getBeds() . "<br>" .
             "- Configurazione: " . $prenotazione->getConfigurazioneId() .
                 " ; " . $configurazione->getTitle() .
-                " ; " . $configurazione->getDescription() .
+                " ; " . $configurazione->getDescription() . "<br>" .
+            "- Pagamento: " . $pagamento->getId() .
+                " ; Status: " . $pagamento->getStatus() .
+                " ; Price: " . $pagamento->getPrice() . " €" .
 
             "<br><br>"
 
 
          ;
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  
 ?>
