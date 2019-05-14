@@ -4,10 +4,10 @@
 
   class Prenotazione {
 
-    private $id;
-    private $stanzaId;
-    private $configurazioneId;
-    private $createdAt;
+    public $id;
+    public $stanzaId;
+    public $configurazioneId;
+    public $createdAt;
 
     function __construct($id, $stanzaId, $configurazioneId, $createdAt) {
 
@@ -56,10 +56,10 @@
 
   class Stanza {
 
-    private $id;
-    private $roomNumber;
-    private $floor;
-    private $beds;
+    public $id;
+    public $roomNumber;
+    public $floor;
+    public $beds;
 
     function __construct($id, $roomNumber, $floor, $beds) {
 
@@ -108,9 +108,9 @@
 
   class Configurazione {
 
-    private $id;
-    private $title;
-    private $description;
+    public $id;
+    public $title;
+    public $description;
 
     function __construct($id, $title, $description) {
 
@@ -152,9 +152,9 @@
 
   class Pagamento {
 
-    private $id;
-    private $status;
-    private $price;
+    public $id;
+    public $status;
+    public $price;
 
     function __construct($id, $status, $price) {
 
@@ -199,9 +199,9 @@
 
   class Ospite {
 
-    private $id;
-    private $name;
-    private $lastname;
+    public $id;
+    public $name;
+    public $lastname;
 
     function __construct($id, $name, $lastname) {
 
@@ -233,15 +233,19 @@
       ";
 
       $result = $conn->query($sql);
+      $ospiti = [];
 
       if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        $ospite = new Ospite( $row["id"],
-                              $row["name"],
-                              $row["lastname"]);
+        while($row = $result->fetch_assoc()) {
+          $ospite = new Ospite( $row["id"],
+                                $row["name"],
+                                $row["lastname"]);
+
+          $ospiti[] = $ospite;
+        };
       }
 
-      return $ospite;
+      return $ospiti;
     }
   }
 
@@ -255,6 +259,10 @@
 
   $prenotazioni = Prenotazione::getAllPrenotazioni($conn);
 
+  $response = [
+
+  ];
+
   foreach ($prenotazioni as $prenotazione) {
 
     $stanzaId = $prenotazione->getStanzaId();
@@ -267,22 +275,39 @@
     $pagamento = Pagamento::getPagamentoById($conn, $pagamentoId);
 
     $ospiteId = $prenotazione->getId();
-    $ospite = Ospite::getOspiteById($conn, $ospiteId);
+    $ospiti = Ospite::getOspiteById($conn, $ospiteId);
 
-    echo "Prenotazione: " . $prenotazione->getId() . "<br>" .
-            "- Stanza: " . $stanza->getId() .
-                " ; Number: " . $stanza->getRoomNumber() .
-                " ; Floor: " . $stanza->getFloor() .
-                " ; Beds: " . $stanza->getBeds() . "<br>" .
-            "- Configurazione: " . $prenotazione->getConfigurazioneId() .
-                " ; " . $configurazione->getTitle() .
-                " ; " . $configurazione->getDescription() . "<br>" .
-            "- Pagamento: " . $pagamento->getId() .
-                " ; Status: " . $pagamento->getStatus() .
-                " ; Price: " . $pagamento->getPrice() . " € <br>" .
-            "- Ospiti: " .  $ospite->getName() .
-                " " . $ospite->getLastname() . "<br><br>"
-         ;
+    // Create obj for json_encode
+    $prenotazione->stanza = $stanza;
+    $prenotazione->configurazione = $configurazione;
+    $prenotazione->pagamento = $pagamento;
+    $prenotazione->ospiti = $ospiti;
+    $response[] = $prenotazione;
+
+    // Create echo with multiple ospiti
+
+    // echo "Prenotazione: " . $prenotazione->getId() . "<br>" .
+    //         "- Stanza: " . $stanza->getId() .
+    //             " ; Number: " . $stanza->getRoomNumber() .
+    //             " ; Floor: " . $stanza->getFloor() .
+    //             " ; Beds: " . $stanza->getBeds() . "<br>" .
+    //         "- Configurazione: " . $prenotazione->getConfigurazioneId() .
+    //             " ; " . $configurazione->getTitle() .
+    //             " ; " . $configurazione->getDescription() . "<br>" .
+    //         "- Pagamento: " . $pagamento->getId() .
+    //             " ; Status: " . $pagamento->getStatus() .
+    //             " ; Price: " . $pagamento->getPrice() . " € <br>" .
+    //         "- Ospiti: ";
+    //
+    // foreach ($ospiti as $ospite) {
+    //   echo $ospite->getName() . " " . $ospite->getLastname() . ", ";
+    // }
+    //
+    // echo "<br><br>";
+
+
   }
+
+  echo json_encode($response);
 
 ?>
