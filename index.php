@@ -286,28 +286,28 @@
 
     // Create echo with multiple ospiti
 
-    // echo "Prenotazione: " . $prenotazione->getId() . "<br>" .
-    //         "- Stanza: " . $stanza->getId() .
-    //             " ; Number: " . $stanza->getRoomNumber() .
-    //             " ; Floor: " . $stanza->getFloor() .
-    //             " ; Beds: " . $stanza->getBeds() . "<br>" .
-    //         "- Configurazione: " . $prenotazione->getConfigurazioneId() .
-    //             " ; " . $configurazione->getTitle() .
-    //             " ; " . $configurazione->getDescription() . "<br>" .
-    //         "- Pagamento: " . $pagamento->getId() .
-    //             " ; Status: " . $pagamento->getStatus() .
-    //             " ; Price: " . $pagamento->getPrice() . " € <br>" .
-    //         "- Ospiti: ";
-    //
-    // foreach ($ospiti as $ospite) {
-    //   echo $ospite->getName() . " " . $ospite->getLastname() . ", ";
-    // }
-    //
-    // echo "<br><br>";
+    echo "Prenotazione: " . $prenotazione->getId() . "<br>" .
+            "- Stanza: " . $stanza->getId() .
+                " ; Number: " . $stanza->getRoomNumber() .
+                " ; Floor: " . $stanza->getFloor() .
+                " ; Beds: " . $stanza->getBeds() . "<br>" .
+            "- Configurazione: " . $prenotazione->getConfigurazioneId() .
+                " ; " . $configurazione->getTitle() .
+                " ; " . $configurazione->getDescription() . "<br>" .
+            "- Pagamento: " . $pagamento->getId() .
+                " ; Status: " . $pagamento->getStatus() .
+                " ; Price: " . $pagamento->getPrice() . " € <br>" .
+            "- Ospiti: ";
+
+    foreach ($ospiti as $ospite) {
+      echo $ospite->getName() . " " . $ospite->getLastname() . ", ";
+    }
+
+    echo "<br><br>";
 
 
   }
 
-  echo json_encode($response);
+  // echo json_encode($response);
 
 ?>
